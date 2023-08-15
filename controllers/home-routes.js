@@ -1,13 +1,14 @@
 const router = require('express').Router();
 const { Post, Comment, User } = require('../models/');
 
-// get all posts for homepage
+// Get all posts for homepage
 router.get('/', async (req, res) => {
   try {
     const postData = await Post.findAll({
-      include: [User],
+      include: [User], // Include user data for each post
     });
 
+    // Map and render posts with the all-posts layout
     const posts = postData.map((post) => post.get({ plain: true }));
 
     res.render('all-posts', { posts });
@@ -16,15 +17,15 @@ router.get('/', async (req, res) => {
   }
 });
 
-// get single post
+// Get a single post along with its user and comments
 router.get('/post/:id', async (req, res) => {
   try {
     const postData = await Post.findByPk(req.params.id, {
       include: [
-        User,
+        User, // Include user data for the post
         {
           model: Comment,
-          include: [User],
+          include: [User], // Include user data for each comment
         },
       ],
     });
@@ -34,6 +35,7 @@ router.get('/post/:id', async (req, res) => {
 
       res.render('single-post', { post });
     } else {
+      // Post not found
       res.status(404).end();
     }
   } catch (err) {
@@ -41,6 +43,7 @@ router.get('/post/:id', async (req, res) => {
   }
 });
 
+// Render the login page if not already logged in
 router.get('/login', (req, res) => {
   if (req.session.loggedIn) {
     res.redirect('/');
@@ -50,6 +53,7 @@ router.get('/login', (req, res) => {
   res.render('login');
 });
 
+// Render the signup page if not already logged in
 router.get('/signup', (req, res) => {
   if (req.session.loggedIn) {
     res.redirect('/');
